@@ -1,49 +1,37 @@
-name: Build APK
+name: Build Android App
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:
+    branches: [ main ]
+  workflow_dispatch: # Permite acionamento manual
+
+env:
+  GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4096M -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.caching=true"
 
 jobs:
-  build:
+  build-android:
+    name: Build Debug APK
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
     steps:
-      - name: 📥 Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: ☕ Set up JDK 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: '17'
+          java-version: "17"
+          distribution: "temurin"
 
-      - name: 🐘 Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
 
-      - name: 🔑 Grant execute permission
-        run: chmod +x gradlew || true
+      - name: Build Debug APK
+        run: ./gradlew :app:assembleDebug
 
-      - name: 🏗️ Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon
-
-      - name: 📤 Upload Debug APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: iptv-hero-pro-debug-apk
+          name: app-debug-apk
           path: app/build/outputs/apk/debug/*.apk
-          retention-days: 30
-
-      - name: 📦 Build Release APK (unsigned)
-        run: ./gradlew assembleRelease --no-daemon
-
-      - name: 📤 Upload Release APK (unsigned)
-        uses: actions/upload-artifact@v4
-        with:
-          name: iptv-hero-pro-release-unsigned
-          path: app/build/outputs/apk/release/*.apk
-          retention-days: 30
