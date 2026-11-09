@@ -1,0 +1,3 @@
+-keep class com.iptv.heropro.** { *; }
+-dontwarn okhttp3.**
+-dontwarn okio.**
